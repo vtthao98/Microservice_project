@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="product-container">
+      <div class="order-box">
+        <div class="order-info">
+          <div class="title">Thông tin đặt hàng</div>
+          <div class="list">
+            <input type="text" value="Tên" class="name" id="name" required />
+            <input
+              type="text"
+              value="0123456789"
+              class="phone"
+              id="phone"
+              required
+            />
+            <input
+              type="text"
+              value="12 abc xyz"
+              class="address"
+              id="address"
+              required
+            />
+          </div>
+        </div>
+        <hr />
+        <div class="order-products">
+          <div class="title">Đơn hàng</div>
+          <table id="orderList"></table>
+          <p class="total-price" id="totalPrice"></p>
+          <div class="btn-order" onclick="submitOrder()">Đặt hàng</div>
+        </div>
+      </div>
+      <div class="product-box">
+        <div class="list-product" id="list-product"></div>
+      </div>
+    </div>
+    <a href="/history" class="floating-btn"><i class="fas fa-receipt"></i></a>
+    <script src="javascripts/order.js"></script>
+  </body>
+</html>

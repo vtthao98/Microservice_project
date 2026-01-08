@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+  </head>
+  <body>
+    <div class="login-box" method="post" action="/">
+      <div class="information">
+        <input
+          type="text"
+          class="phone info-text"
+          placeholder="Số điện thoại"
+          id="phone"
+        />
+        <input
+          type="password"
+          class="password info-text"
+          placeholder="Mật khẩu"
+          id="password"
+        />
+      </div>
+      <div class="btn-login">
+        <button class="login" onclick="login()">Đăng nhập</button>
+      </div>
+      <div class="register-text">
+        <i>Chưa có tài khoản?</i>
+        <a href="/register" class="link-register">Đăng ký</a>
+      </div>
+    </div>
+    <script src="javascripts/login.js"></script>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="order-container">
+      <h1>LỊCH SỬ ĐẶT HÀNG</h1>
+      <table class="order-table" id="order-table">
+        <!-- <th>Mã Đơn hàng</th>
+        <th>Thời gian đặt hàng</th>
+        <th>Tổng tiền</th>
+        <th>Tình trạng</th>
+        <tr>
+          <td>
+            <button class="openOrderDetail" onclick="openOrderDetail('10132')">
+              1012
+            </button>
+          </td>
+          <td>10:00 13/01/2025</td>
+          <td>120000đ</td>
+          <td>Hoàn thành</td>
+        </tr> -->
+      </table>
+    </div>
+    <a href="/order" class="floating-btn"><i class="fas fa-home"></i></a>
+    <div class="modal" id="orderModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 class="tilte">CHI TIẾT ĐƠN HÀNG <span id="orderID"></span></h2>
+        <table id="modal-body">
+          <!-- <th>Đồ uống</th>
+          <th>Đơn giá</th>
+          <th>Số lượng</th>
+          <tr>
+            <td>Trà sữa</td>
+            <td>20000đ</td>
+            <td>2</td> -->
+          </tr>
+        </table>
+      </div>
+    </div>
+    <script src="javascripts/history.js"></script>
+  </body>
+</html>
