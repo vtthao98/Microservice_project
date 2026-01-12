@@ -103,7 +103,7 @@ function renderOrders(orders) {
 }
 
 //THAY ĐỔI TAB
-function changeTab(element, contentID) {
+window.changeTab = function (element, contentID) {
   //Lấy tất cả các tab
   const tabs = document.querySelectorAll(".tab-item");
   const panels = document.querySelectorAll(".content-panel");
@@ -115,7 +115,7 @@ function changeTab(element, contentID) {
   //Thêm class active vào tab vừa nhấn
   element.classList.add("active");
   document.getElementById(contentID).classList.add("active");
-}
+};
 
 //MỞ MODAL XÓA
 let deleteType = "";
@@ -129,7 +129,7 @@ deleteBtn.addEventListener("click", () => {
   }
 });
 
-function openDeleteModal(type, ID, name) {
+window.openDeleteModal = function (type, ID, name) {
   document.getElementById("deleteModal").style.display = "block";
   let IDDelete = document.getElementById("IDDelete");
   deleteType = type;
@@ -139,18 +139,18 @@ function openDeleteModal(type, ID, name) {
   } else if (type === "product") {
     IDDelete.innerText = name;
   }
-}
+};
 
 //MỞ MODAL THÊM SẢN PHẨM
-function openAddProductModal() {
+window.openAddProductModal = function () {
   document.getElementById("addProductName").value = "";
   document.getElementById("addProductImage").value = "";
   document.getElementById("addProductPrice").value = "";
   document.getElementById("addProductModal").style.display = "block";
-}
+};
 
 //MỞ MODAL SỬA SẢN PHẨM
-function openUpdateProductModal(product) {
+window.openUpdateProductModal = function (product) {
   document.getElementById("updateProductName").value = product.name;
   document.getElementById("updateProductImage").value = product.image;
   document.getElementById("updateProductPrice").value = product.price;
@@ -158,19 +158,19 @@ function openUpdateProductModal(product) {
     <button class="save-btn" onclick="updateProduct('${product.id}')">Lưu</button>
   `;
   document.getElementById("updateProductModal").style.display = "block";
-}
+};
 
 //MỞ MODAL SỬA TÌNH TRẠNG ĐƠN HÀNG
-function openUpdateOrderModal(orderID, status) {
+window.openUpdateOrderModal = function (orderID, status) {
   const orderStatus = document.getElementById("orderStatus");
   orderStatus.value = status;
   document.getElementById("updateOrderModal").style.display = "block";
   let maDonHang = document.getElementById("IDOrder");
   maDonHang.innerText = orderID;
-}
+};
 
 //MỞ MODAL CHI TIẾT ĐƠN HÀNG
-async function openOrderDetail(orderID) {
+window.openOrderDetail = async function (orderID) {
   try {
     const response = await fetch(`/api/history/${orderID}`, {
       method: "GET",
@@ -208,14 +208,14 @@ async function openOrderDetail(orderID) {
     alert(error.message);
     console.error(error);
   }
-}
+};
 
-function closeModal(name) {
+window.closeModal = function (name) {
   document.getElementById(name).style.display = "none";
-}
+};
 
 //THÊM MỚI SẢN PHẨM
-async function addProduct() {
+window.addProduct = async function () {
   const name = document.getElementById("addProductName").value;
   const image = document.getElementById("addProductImage").value;
   const price = document.getElementById("addProductPrice").value;
@@ -252,10 +252,10 @@ async function addProduct() {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};
 
 //SỬA SẢN PHẨM
-async function updateProduct(productID) {
+window.updateProduct = async function (productID) {
   const name = document.getElementById("updateProductName").value;
   const image = document.getElementById("updateProductImage").value;
   const price = document.getElementById("updateProductPrice").value;
@@ -290,10 +290,10 @@ async function updateProduct(productID) {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};
 
 //SỬA TÌNH TRẠNG ĐƠN HÀNG
-async function updateOrder() {
+window.updateOrder = async function () {
   const orderId = document.getElementById("IDOrder").innerText;
   const orderStatus = document.getElementById("orderStatus").value;
   try {
@@ -320,9 +320,9 @@ async function updateOrder() {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};
 
-async function deleteProduct(id) {
+window.deleteProduct = async function (id) {
   try {
     const response = await fetch(`/management/product/${id}`, {
       method: "DELETE",
@@ -340,9 +340,9 @@ async function deleteProduct(id) {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};
 
-async function deleteOrder(id) {
+window.deleteOrder = async function (id) {
   try {
     const response = await fetch(`/management/order/${id}`, {
       method: "DELETE",
@@ -360,4 +360,4 @@ async function deleteOrder(id) {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};

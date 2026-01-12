@@ -1,4 +1,4 @@
-import { token } from "./auth";
+import { token } from "./auth.js";
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
@@ -55,7 +55,7 @@ async function loadHistory() {
   }
 }
 
-async function openOrderDetail(orderID) {
+window.openOrderDetail = async function (orderID) {
   try {
     const response = await fetch(`/api/history/${orderID}`, {
       method: "GET",
@@ -93,11 +93,11 @@ async function openOrderDetail(orderID) {
     alert(error.message);
     console.error(error);
   }
-}
+};
 
-function closeModal() {
+window.closeModal = function () {
   document.getElementById("orderModal").style.display = "none";
-}
+};
 
 window.onclick = function (event) {
   let modal = document.getElementById("orderModal");

@@ -1,4 +1,4 @@
-import { token } from "./auth";
+import { token } from "./auth.js";
 
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
@@ -81,7 +81,7 @@ async function getUserInfo() {
 let cart = [];
 
 //THÊM SẢN PHẨM VÀO GIỎ
-function addToCart(product) {
+window.addToCart = function (product) {
   let item = cart.find((p) => p.product_id === product.id);
 
   if (item) {
@@ -95,19 +95,19 @@ function addToCart(product) {
     });
     renderCart();
   }
-}
+};
 
 //TĂNG SỐ LƯỢNG SẢN PHẨM
-function increaseNumberOfProduct(id) {
+window.increaseNumberOfProduct = function (id) {
   let item = cart.find((p) => p.product_id === id);
   if (item) {
     item.number++;
     renderCart();
   }
-}
+};
 
 //GIẢM SỐ LƯỢNG SẢN PHẨM
-function decreaseNumberOfProduct(id) {
+window.decreaseNumberOfProduct = function (id) {
   let item = cart.find((p) => p.product_id === id);
   if (item) {
     if (item.number > 1) {
@@ -117,7 +117,7 @@ function decreaseNumberOfProduct(id) {
     }
     renderCart();
   }
-}
+};
 
 //TÍNH TỔNG TIỀN
 function getTotalPrice() {
@@ -157,7 +157,7 @@ function renderCart() {
 }
 
 //ĐẶT HÀNG
-async function submitOrder() {
+window.submitOrder = async function () {
   const name = document.getElementById("name").value;
   const phone = document.getElementById("phone").value;
   const address = document.getElementById("address").value;
@@ -199,4 +199,4 @@ async function submitOrder() {
     alert(error.message);
     console.error("Error: ", error);
   }
-}
+};
