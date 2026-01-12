@@ -1,10 +1,10 @@
+import { token } from "./auth";
+
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
   minimumFractionDigits: 0, // Số chữ số thập phân
 });
-
-const token = localStorage.getItem("token");
 
 window.onload = loadProducts;
 

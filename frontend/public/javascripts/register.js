@@ -6,10 +6,12 @@ async function register() {
 
   if (!name || !phone || !password || !password_repeat) {
     alert("Nhập đầy đủ thông tin đăng ký");
+    return;
   }
 
   if (password !== password_repeat) {
     alert("Mật khẩu không đúng");
+    return;
   }
 
   try {
