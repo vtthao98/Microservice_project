@@ -22,55 +22,16 @@
           Thêm sản phẩm
         </button>
         <table id="productTable">
-          <!-- <th>Tên sản phẩm</th>
-          <th>Hình ảnh</th>
-          <th>Đơn giá</th>
-          <th>Trạng thái</th>
-          <tr>
-            <td>Trà sữa</td>
-            <td><img src="/images/bacXiuDa.png" alt="" /></td>
-            <td>20000đ</td>
-            <td>
-              <button
-                onclick="openAddProductModal({name: 'Trà sữa', image: '/images/bacXiuDa.png', price: 20000})"
-              >
-                Sửa
-              </button>
-              <button onclick="openDeleteModal('product', 'Trà sữa')">
-                Xóa
-              </button>
-            </td>
-          </tr> -->
         </table>
       </div>
       <div class="content-panel" id="order-content">
         <table id="orderTable">
-          <!-- <th>Mã đơn hàng</th>
-          <th>Thời gian đặt hàng</th>
-          <th>SĐT đặt hàng</th>
-          <th>Địa chỉ giao hàng</th>
-          <th>Tổng tiền</th>
-          <th>Tình trạng</th>
-          <th>Trạng thái</th>
-          <tr>
-            <td>11389</td>
-            <td>9:30 17/08/2020</td>
-            <td>0123456789</td>
-            <td>102 Hùng Vương, phường Tam Kỳ</td>
-            <td>123000đ</td>
-            <td>Chưa hoàn thành</td>
-            <td>
-              <button onclick="openUpdateOrderModal('11389')">Sửa</button>
-              <button onclick="openDeleteModal('order', '11389')">Xóa</button>
-            </td>
-          </tr> -->
         </table>
       </div>
     </div>
-
     <!-- MODAL XÁC NHẬN XÓA ĐƠN HÀNG VÀ SẢN PHẨM -->
     <div class="modal" id="deleteModal">
-      <div class="modal-content">
+      <div class="modal-content delete">
         <span class="close-btn" onclick="closeModal('deleteModal')"
           >&times;</span
         >
@@ -92,26 +53,56 @@
         <span class="close-btn" onclick="closeModal('addProductModal')"
           >&times;</span
         >
+        <h2 class="tilte">Thêm sản phẩm</h2>
         <div class="modalForm">
           <input
             class="modalItem"
             type="text"
             placeholder="Tên sản phẩm"
-            id="productName"
+            id="addProductName"
           />
           <input
             class="modalItem"
             type="text"
             placeholder="Link hình ảnh"
-            id="productImage"
+            id="addProductImage"
           />
           <input
             class="modalItem"
             type="text"
             placeholder="Đơn giá"
-            id="productPrice"
+            id="addProductPrice"
           />
-          <button class="save-btn" id="saveProduct-btn">Lưu</button>
+          <button class="save-btn" onclick="addProduct()">Lưu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL SỬA SẢN PHẨM -->
+    <div class="modal" id="updateProductModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('updateProductModal')"
+          >&times;</span
+        >
+        <h2 class="tilte">Sửa sản phẩm</h2>
+        <div class="modalForm">
+          <input
+            class="modalItem"
+            type="text"
+            id="updateProductName"
+          />
+          <input
+            class="modalItem"
+            type="text"
+            id="updateProductImage"
+          />
+          <input
+            class="modalItem"
+            type="text"
+            id="updateProductPrice"
+          />
+          <div id="btn-saveUpdateProduct">
+          </div>
         </div>
       </div>
     </div>

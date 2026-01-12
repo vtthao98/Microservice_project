@@ -1,24 +1,33 @@
-const userId = localStorage.getItem("userId");
-if (!userId) {
-  alert("Đăng nhập để tiếp tục");
-  window.location.href = "/";
-}
+const formatterVND = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+  minimumFractionDigits: 0, // Số chữ số thập phân
+});
+
+const token = localStorage.getItem("token");
+
 window.onload = loadProducts;
 
 async function loadProducts() {
   try {
-    const response = await fetch("/api/order");
-    if (!response.ok) {
-      throw new Error("Không lấy được danh sách sản phẩm");
-    }
-
+    const response = await fetch("/api/order", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const products = await response.json();
+
+    if (!response.ok) {
+      throw new Error(products.message);
+    }
 
     const list = document.getElementById("list-product");
 
     list.innerHTML = "";
 
     products.forEach((product) => {
+      const price = formatterVND.format(product.price);
       list.innerHTML += `
         <div class="item">
           <div class="img">
@@ -26,10 +35,10 @@ async function loadProducts() {
           </div>
           <div class="content">
             <div class="product-name">${product.name}</div>
-            <div class="price">${product.price}</div>
+            <div class="price">${price}</div>
             <button
               class="add-cart"
-              onclick="addToCart({id: ${product.id}, name: '${product.name}', price: ${product.price},})"
+              onclick="addToCart({id: '${product.id}', name: '${product.name}', price: ${product.price},})"
             >
               Mua
             </button>
@@ -38,6 +47,30 @@ async function loadProducts() {
 
       `;
     });
+
+    getUserInfo();
+  } catch (error) {
+    alert(error.message);
+    console.error(error);
+  }
+}
+
+async function getUserInfo() {
+  try {
+    const response = await fetch("/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const user = await response.json();
+
+    if (!response.ok) {
+      throw new Error(user.message);
+    }
+
+    document.getElementById("name").value = user.name;
+    document.getElementById("phone").value = user.phone;
   } catch (error) {
     alert(error.message);
     console.error(error);
@@ -49,13 +82,13 @@ let cart = [];
 
 //THÊM SẢN PHẨM VÀO GIỎ
 function addToCart(product) {
-  let item = cart.find((p) => p.id === product.id);
+  let item = cart.find((p) => p.product_id === product.id);
 
   if (item) {
     alert("Sản phẩm đã tồn tại trong giỏ hàng!");
   } else {
     cart.push({
-      id: product.id,
+      product_id: product.id,
       name: product.name,
       price: product.price,
       number: 1,
@@ -66,7 +99,7 @@ function addToCart(product) {
 
 //TĂNG SỐ LƯỢNG SẢN PHẨM
 function increaseNumberOfProduct(id) {
-  let item = cart.find((p) => p.id === id);
+  let item = cart.find((p) => p.product_id === id);
   if (item) {
     item.number++;
     renderCart();
@@ -75,7 +108,7 @@ function increaseNumberOfProduct(id) {
 
 //GIẢM SỐ LƯỢNG SẢN PHẨM
 function decreaseNumberOfProduct(id) {
-  let item = cart.find((p) => p.id === id);
+  let item = cart.find((p) => p.product_id === id);
   if (item) {
     if (item.number > 1) {
       item.number--;
@@ -106,21 +139,21 @@ function renderCart() {
   }
 
   cart.forEach((item) => {
-    let itemTotalPrice = item.price * item.number;
+    let itemTotalPrice = formatterVND.format(item.price * item.number);
     orderList.innerHTML += `
         <tr>
           <td class="name">${item.name}</td>
           <td class="change_number">
-              <button class="btn-change_number" onclick="increaseNumberOfProduct(${item.id})">+</button>
+              <button class="btn-change_number" onclick="increaseNumberOfProduct('${item.product_id}')">+</button>
               <div class="number">${item.number}</div>
-              <button class="btn-change_number" onclick="decreaseNumberOfProduct(${item.id})">-</button>
+              <button class="btn-change_number" onclick="decreaseNumberOfProduct('${item.product_id}')">-</button>
           </td>
-          <td class="price">${itemTotalPrice}đ</td>
+          <td class="price">${itemTotalPrice}</td>
         </tr>
     `;
   });
 
-  totalPrice.innerText = "Tổng: " + getTotalPrice() + "đ";
+  totalPrice.innerText = "Tổng: " + formatterVND.format(getTotalPrice());
 }
 
 //ĐẶT HÀNG
@@ -143,10 +176,10 @@ async function submitOrder() {
     const response = await fetch("/order", {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: userId,
         phone: phone,
         name: name,
         address: address,

@@ -1,18 +1,28 @@
-const userId = localStorage.getItem("userId");
-if (!userId) {
-  alert("Đăng nhập để tiếp tục");
-  window.location.href = "/";
-}
+const formatterVND = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+  minimumFractionDigits: 0, // Số chữ số thập phân
+});
+
+const token = localStorage.getItem("token");
 
 window.onload = loadHistory;
 
 async function loadHistory() {
   try {
-    const response = await fetch(`/api/history?userId=${userId}`);
-    if (!response.ok) {
-      throw new Error("Không lấy được lịch sử đặt hàng");
-    }
+    const response = await fetch("/api/history", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     const orderHistory = await response.json();
+
+    if (!response.ok) {
+      throw new Error(orderHistory.message);
+    }
+
     console.log(orderHistory);
     const orderTable = document.getElementById("order-table");
 
@@ -24,6 +34,8 @@ async function loadHistory() {
 
     `;
     orderHistory.forEach((element) => {
+      const time = new Date(element.time).toLocaleString("vi-VN");
+      const totalPrice = formatterVND.format(element.totalPrice);
       orderTable.innerHTML += `
         <tr>
           <td>
@@ -31,8 +43,8 @@ async function loadHistory() {
               ${element.id}
             </button>
           </td>
-          <td>${element.time}</td>
-          <td>${element.totalPrice}</td>
+          <td>${time}</td>
+          <td>${totalPrice}</td>
           <td>${element.status}</td>
         </tr>
       
@@ -46,7 +58,12 @@ async function loadHistory() {
 
 async function openOrderDetail(orderID) {
   try {
-    const response = await fetch(`/api/history/${orderID}`);
+    const response = await fetch(`/api/history/${orderID}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error("Không lấy được chi tiết đơn hàng");
     }
@@ -60,10 +77,11 @@ async function openOrderDetail(orderID) {
 
     `;
     orderDetails.forEach((element) => {
+      const price = formatterVND.format(element.price);
       detailTable.innerHTML += `
         <tr>
           <td>${element.name}</td>
-          <td>${element.price}</td>
+          <td>${price}</td>
           <td>${element.number}</td>
         </tr>
 

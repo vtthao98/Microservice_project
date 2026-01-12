@@ -1,8 +1,21 @@
+const formatterVND = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+  minimumFractionDigits: 0, // Số chữ số thập phân
+});
+
+const token = localStorage.getItem("token");
+
 window.onload = loadData;
 
 async function loadData() {
   try {
-    const response = await fetch("/api/management");
+    const response = await fetch("/api/management", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error("Không lấy được dữ liệu");
     }
@@ -25,18 +38,23 @@ function renderProducts(products) {
     `;
 
   products.forEach((element) => {
+    let price = formatterVND.format(element.price);
     productTable.innerHTML += `
         <tr>
             <td>${element.name}</td>
             <td><img src="${element.image}" alt="" /></td>
-            <td>${element.price}</td>
+            <td>${price}</td>
             <td>
             <button
-                onclick="openAddProductModal({id: ${element.id}, name: '${element.name}', image: '${element.image}', price: ${element.price}})"
+                onclick="openUpdateProductModal({
+                  id: '${element.id}', 
+                  name: '${element.name}', 
+                  image: '${element.image}', 
+                  price: ${element.price}})"
             >
                 Sửa
             </button>
-            <button onclick="openDeleteModal('product', '${element.name}')">
+            <button onclick="openDeleteModal('product', '${element.id}', '${element.name}')">
                 Xóa
             </button>
             </td>
@@ -60,6 +78,8 @@ function renderOrders(orders) {
     `;
 
   orders.forEach((element) => {
+    const time = new Date(element.time).toLocaleString("vi-VN");
+    const totalPrice = formatterVND.format(element.totalPrice);
     orderTable.innerHTML += `
         <tr>
             <td>
@@ -68,10 +88,10 @@ function renderOrders(orders) {
               </button>
             </td>
             <td>${element.userId}</td>
-            <td>${element.time}</td>
+            <td>${time}</td>
             <td>${element.phone}</td>
             <td>${element.address}</td>
-            <td>${element.totalPrice}</td>
+            <td>${totalPrice}</td>
             <td>${element.status}</td>
             <td>
               <button onclick="openUpdateOrderModal('${element.id}', '${element.status}')">Sửa</button>
@@ -109,7 +129,7 @@ deleteBtn.addEventListener("click", () => {
   }
 });
 
-function openDeleteModal(type, ID) {
+function openDeleteModal(type, ID, name) {
   document.getElementById("deleteModal").style.display = "block";
   let IDDelete = document.getElementById("IDDelete");
   deleteType = type;
@@ -117,34 +137,27 @@ function openDeleteModal(type, ID) {
   if (type === "order") {
     IDDelete.innerText = "đơn hàng " + ID;
   } else if (type === "product") {
-    IDDelete.innerText = "đồ uống " + ID;
+    IDDelete.innerText = name;
   }
 }
 
-//MỞ MODAL THÊM/SỬA SẢN PHẨM
-let productIdToUpdate = null;
-const btnSave = document.getElementById("saveProduct-btn");
-btnSave.addEventListener("click", () => {
-  if (!productIdToUpdate) {
-    addProduct();
-  } else {
-    updateProduct(productIdToUpdate);
-  }
-});
-
-function openAddProductModal(product) {
-  if (product) {
-    document.getElementById("productName").value = product.name;
-    document.getElementById("productImage").value = product.image;
-    document.getElementById("productPrice").value = product.price;
-    productIdToUpdate = product.id;
-  } else {
-    document.getElementById("productName").value = "";
-    document.getElementById("productImage").value = "";
-    document.getElementById("productPrice").value = "";
-    productIdToUpdate = null;
-  }
+//MỞ MODAL THÊM SẢN PHẨM
+function openAddProductModal() {
+  document.getElementById("addProductName").value = "";
+  document.getElementById("addProductImage").value = "";
+  document.getElementById("addProductPrice").value = "";
   document.getElementById("addProductModal").style.display = "block";
+}
+
+//MỞ MODAL SỬA SẢN PHẨM
+function openUpdateProductModal(product) {
+  document.getElementById("updateProductName").value = product.name;
+  document.getElementById("updateProductImage").value = product.image;
+  document.getElementById("updateProductPrice").value = product.price;
+  document.getElementById("btn-saveUpdateProduct").innerHTML = `
+    <button class="save-btn" onclick="updateProduct('${product.id}')">Lưu</button>
+  `;
+  document.getElementById("updateProductModal").style.display = "block";
 }
 
 //MỞ MODAL SỬA TÌNH TRẠNG ĐƠN HÀNG
@@ -159,7 +172,12 @@ function openUpdateOrderModal(orderID, status) {
 //MỞ MODAL CHI TIẾT ĐƠN HÀNG
 async function openOrderDetail(orderID) {
   try {
-    const response = await fetch(`/api/history/${orderID}`);
+    const response = await fetch(`/api/history/${orderID}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error("Không lấy được chi tiết đơn hàng");
     }
@@ -173,10 +191,11 @@ async function openOrderDetail(orderID) {
 
     `;
     orderDetails.forEach((element) => {
+      let price = formatterVND.format(element.price);
       detailTable.innerHTML += `
         <tr>
           <td>${element.name}</td>
-          <td>${element.price}</td>
+          <td>${price}</td>
           <td>${element.number}</td>
         </tr>
 
@@ -197,9 +216,9 @@ function closeModal(name) {
 
 //THÊM MỚI SẢN PHẨM
 async function addProduct() {
-  const name = document.getElementById("productName").value;
-  const image = document.getElementById("productImage").value;
-  const price = document.getElementById("productPrice").value;
+  const name = document.getElementById("addProductName").value;
+  const image = document.getElementById("addProductImage").value;
+  const price = document.getElementById("addProductPrice").value;
 
   if (!name || !image || !price) {
     alert("Nhập đầy đủ thông tin sản phẩm");
@@ -210,6 +229,7 @@ async function addProduct() {
     const response = await fetch("/management", {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -236,9 +256,9 @@ async function addProduct() {
 
 //SỬA SẢN PHẨM
 async function updateProduct(productID) {
-  const name = document.getElementById("productName").value;
-  const image = document.getElementById("productImage").value;
-  const price = document.getElementById("productPrice").value;
+  const name = document.getElementById("updateProductName").value;
+  const image = document.getElementById("updateProductImage").value;
+  const price = document.getElementById("updateProductPrice").value;
 
   if (!name || !image || !price) {
     alert("Nhập đầy đủ thông tin sản phẩm");
@@ -249,6 +269,7 @@ async function updateProduct(productID) {
     const response = await fetch(`/management/product/${productID}`, {
       method: "PUT",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -261,7 +282,6 @@ async function updateProduct(productID) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Sửa sản phẩm thất bại");
     }
-
     // const data = await response.json();
     // console.log("Product:", data);
     alert("Sửa sản phẩm thành công");
@@ -278,8 +298,9 @@ async function updateOrder() {
   const orderStatus = document.getElementById("orderStatus").value;
   try {
     const response = await fetch(`/management/order/${orderId}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -305,6 +326,9 @@ async function deleteProduct(id) {
   try {
     const response = await fetch(`/management/product/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -322,6 +346,9 @@ async function deleteOrder(id) {
   try {
     const response = await fetch(`/management/order/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     if (!response.ok) {
       const errorData = await response.json();
