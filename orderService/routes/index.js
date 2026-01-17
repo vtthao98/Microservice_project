@@ -6,7 +6,7 @@ var isAdmin = require("../middlewares/authorizate");
 var router = express.Router();
 
 //LẤY TẤT CẢ ĐƠN HÀNG CHO TRANG MANAGEMENT
-router.get("/", authMiddleware, isAdmin, async (req, res) => {
+router.get("/GET/order", authMiddleware, isAdmin, async (req, res) => {
   try {
     const ordersData = await orders.find().sort({ time: -1 });
     res.status(200).json(ordersData);
@@ -19,7 +19,7 @@ router.get("/", authMiddleware, isAdmin, async (req, res) => {
 });
 
 //LẤY LỊCH SỬ ĐẶT HÀNG CHO TRANG HISTORY
-router.get("/history", authMiddleware, async (req, res) => {
+router.get("/GET/order_history", authMiddleware, async (req, res) => {
   userId = req.user.id;
   try {
     const orderHistory = await orders.find({ userId: userId });
@@ -33,7 +33,7 @@ router.get("/history", authMiddleware, async (req, res) => {
 });
 
 //LẤY CHI TIẾT ĐƠN HÀNG CHO TRANG HISTORY
-router.get("/history/:id", authMiddleware, async (req, res) => {
+router.get("/GET/order_detail/:id", authMiddleware, async (req, res) => {
   const orderId = req.params.id;
   try {
     const order = await orders.findById(orderId);
@@ -52,12 +52,9 @@ router.get("/history/:id", authMiddleware, async (req, res) => {
 });
 
 //THÊM ĐƠN HÀNG
-router.post("/", authMiddleware, async (req, res) => {
-  console.log("Đang ở index.js của order");
+router.post("/POST/order", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  console.log("userId", userId);
   const orderData = req.body;
-  console.log("orderData", orderData);
   if (!orderData) {
     return res.status(401).json({
       message: "Thiếu thông tin đơn hàng",
@@ -67,7 +64,6 @@ router.post("/", authMiddleware, async (req, res) => {
   const totalPrice = orderData.items.reduce((total, item) => {
     return total + item.price * item.number;
   }, 0);
-  console.log("totalPrice", totalPrice);
   try {
     const order = new orders({
       userId: userId,
@@ -77,9 +73,7 @@ router.post("/", authMiddleware, async (req, res) => {
       totalPrice: totalPrice,
       detail: orderData.items,
     });
-    console.log("Thêm");
     await order.save();
-    console.log("Lưu");
     res.status(201).json({
       message: "Thêm đơn hàng thành công",
     });
@@ -91,7 +85,7 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 //SỬA TÌNH TRẠNG ĐƠN HÀNG
-router.patch("/:id", authMiddleware, isAdmin, async (req, res) => {
+router.patch("/PATCH/order/:id", authMiddleware, isAdmin, async (req, res) => {
   const { orderStatus } = req.body;
   const orderId = req.params.id;
 
@@ -125,26 +119,31 @@ router.patch("/:id", authMiddleware, isAdmin, async (req, res) => {
   }
 });
 
-router.delete("/:id", authMiddleware, isAdmin, async (req, res) => {
-  const orderId = req.params.id;
-  try {
-    const order = await orders.findByIdAndDelete(orderId);
+router.delete(
+  "/DELETE/order/:id",
+  authMiddleware,
+  isAdmin,
+  async (req, res) => {
+    const orderId = req.params.id;
+    try {
+      const order = await orders.findByIdAndDelete(orderId);
 
-    if (!order) {
-      return res.status(404).json({
-        message: "Không tìm thấy đơn hàng",
+      if (!order) {
+        return res.status(404).json({
+          message: "Không tìm thấy đơn hàng",
+        });
+      }
+
+      res.status(200).json({
+        message: "Xóa đơn hàng thành công",
+      });
+    } catch (error) {
+      res.status(400).json({
+        message: "Xóa đơn hàng không thành công",
+        error: error.message,
       });
     }
-
-    res.status(200).json({
-      message: "Xóa đơn hàng thành công",
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Xóa đơn hàng không thành công",
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = router;

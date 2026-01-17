@@ -3,17 +3,15 @@ require("dotenv").config();
 
 module.exports = (req, res, next) => {
   //Lấy header Authorization
-  const authHeader = req.headers["authorization"];
+  const token = req.cookies.token;
 
   //Kiểm tra có token không
-  if (!authHeader) {
+  if (!token) {
+    console.log("Product service không có token");
     return res.status(401).json({
       message: "Chưa đăng nhập",
     });
   }
-
-  //Tách token
-  const token = authHeader.split(" ")[1];
 
   try {
     //Verify token

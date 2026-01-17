@@ -1,4 +1,5 @@
 var express = require("express");
+var cookieParser = require("cookie-parser");
 var cors = require("cors");
 var mongoose = require("mongoose");
 var indexRoutes = require("./routes/index");
@@ -7,6 +8,7 @@ require("dotenv").config();
 var app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
 
 //KẾT NỐI DB

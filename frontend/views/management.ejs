@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %></title>
     <link rel="stylesheet" href="/stylesheets/style.css" />
-    <script type="module">
-      import { isAdmin } from "/javascripts/auth.js";
-      isAdmin();
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script>
+      async function logout() {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+        window.location.href = "/";
+      }
     </script>
   </head>
   <body>
+    <button onclick="logout()" class="floating-btn logout-btn">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i>
+    </button>
     <div class="tab-container">
       <div class="tab-item active" onclick="changeTab(this, 'product-content')">
         Quản lý sản phẩm
@@ -122,16 +134,7 @@
           >&times;</span
         >
         <h2 class="tilte">CHI TIẾT ĐƠN HÀNG <span id="orderID"></span></h2>
-        <table id="modal-body">
-          <!-- <th>Đồ uống</th>
-          <th>Đơn giá</th>
-          <th>Số lượng</th>
-          <tr>
-            <td>Trà sữa</td>
-            <td>20000đ</td>
-            <td>2</td>
-          </tr> -->
-        </table>
+        <table id="modal-body"></table>
       </div>
     </div>
 

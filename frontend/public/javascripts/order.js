@@ -1,5 +1,3 @@
-import { token } from "./auth.js";
-
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
@@ -12,9 +10,7 @@ async function loadProducts() {
   try {
     const response = await fetch("/api/order", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     const products = await response.json();
 
@@ -59,9 +55,7 @@ async function getUserInfo() {
   try {
     const response = await fetch("/me", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     const user = await response.json();
 
@@ -176,9 +170,9 @@ window.submitOrder = async function () {
     const response = await fetch("/order", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         phone: phone,
         name: name,
@@ -195,6 +189,8 @@ window.submitOrder = async function () {
     const data = await response.json();
     console.log("Order:", data);
     alert("Đặt hàng thành công");
+    cart = [];
+    renderCart();
   } catch (error) {
     alert(error.message);
     console.error("Error: ", error);

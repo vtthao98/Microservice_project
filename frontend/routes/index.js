@@ -1,6 +1,7 @@
 var express = require("express");
-
 var router = express.Router();
+const checkAdmin = require("../middlewares/checkAdmin.js");
+const checkAuth = require("../middlewares/checkAuth.js");
 
 // Docker network service URLs
 const USER_API = "http://user-service:3001";
@@ -16,13 +17,20 @@ router.get("/", (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const loginData = req.body;
-    const response = await fetch(USER_API, {
+    const response = await fetch(USER_API + "/POST/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(loginData),
     });
+
+    // Forward cookie cho browser
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      res.setHeader("set-cookie", setCookie);
+    }
 
     const data = await response.json();
 
@@ -48,13 +56,21 @@ router.get("/register", (req, res) => {
 router.post("/register", async (req, res) => {
   try {
     const registerData = req.body;
-    const response = await fetch(USER_API + "/register", {
+    const response = await fetch(USER_API + "/POST/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(registerData),
     });
+
+    // Forward cookie cho browser
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      res.setHeader("set-cookie", setCookie);
+    }
+
     const data = await response.json();
     if (!response.ok) {
       return res.status(response.status).json(data);
@@ -68,26 +84,42 @@ router.post("/register", async (req, res) => {
   }
 });
 
+//ĐĂNG XUẤT
+router.post("/logout", async (req, res) => {
+  try {
+    const response = await fetch(USER_API + "/POST/logout", {
+      method: "POST",
+      headers: {
+        cookie: req.headers.cookie || "",
+      },
+    });
+
+    // forward clear-cookie về browser
+    const setCookie = response.headers.get("set-cookie");
+    if (setCookie) {
+      res.setHeader("set-cookie", setCookie);
+    }
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Logout error" });
+  }
+});
+
 //MỞ TRANG ORDER
-router.get("/order", async (req, res) => {
+router.get("/order", checkAuth, async (req, res) => {
   res.render("order", { title: "Đặt hàng" });
 });
 
 //LẤY DANH SÁCH SẢN PHẨM CHO TRANG ORDER
 router.get("/api/order", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
-    const response = await fetch(PRODUCT_API, {
+    const response = await fetch(PRODUCT_API + "/GET/product", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
     });
 
@@ -109,18 +141,11 @@ router.get("/api/order", async (req, res) => {
 //LẤY THÔNG TIN USER ĐỂ ĐẶT HÀNG
 router.get("/me", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
-    const response = await fetch(USER_API + "/me", {
+    const response = await fetch(USER_API + "/GET/me", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
     });
 
@@ -142,19 +167,12 @@ router.get("/me", async (req, res) => {
 //THÊM ĐƠN HÀNG
 router.post("/order", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const orderData = req.body;
-    const response = await fetch(ORDER_API, {
+    const response = await fetch(ORDER_API + "/POST/order", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
       body: JSON.stringify(orderData),
     });
@@ -171,25 +189,19 @@ router.post("/order", async (req, res) => {
   }
 });
 
-router.get("/history", async (req, res) => {
+//MỞ TRANG HISTORY
+router.get("/history", checkAuth, async (req, res) => {
   res.render("history", { title: "Lịch sử đặt hàng" });
 });
 
 //LẤY LỊCH SỬ ĐƠN HÀNG CHO TRANG HISTORY
 router.get("/api/history", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
-    const response = await fetch(ORDER_API + "/history", {
+    const response = await fetch(ORDER_API + "/GET/order_history", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
     });
     const data = await response.json();
@@ -208,19 +220,12 @@ router.get("/api/history", async (req, res) => {
 //LẤY CHI TIẾT ĐƠN HÀNG CHO TRANG HISTORY
 router.get("/api/history/:orderId", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const orderId = req.params.orderId;
-    const response = await fetch(ORDER_API + `/history/${orderId}`, {
+    const response = await fetch(ORDER_API + `/GET/order_detail/${orderId}`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
     });
     const data = await response.json();
@@ -236,33 +241,27 @@ router.get("/api/history/:orderId", async (req, res) => {
   }
 });
 
-router.get("/management", async (req, res) => {
+//MỞ TRANG QUẢN LÝ
+router.get("/management", checkAdmin, (req, res) => {
   res.render("management", { title: "Quản lý" });
 });
 
-//LẤY TẤT CẢ ĐƠN HÀNG CHO TRANG MANAGEMENT
+//LẤY TẤT CẢ SẢN PHẨM VÀ ĐƠN HÀNG CHO TRANG MANAGEMENT
 router.get("/api/management", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const [productRes, orderRes] = await Promise.all([
-      fetch(PRODUCT_API, {
+      fetch(PRODUCT_API + "/GET/product", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          cookie: req.headers.cookie,
         },
       }),
-      fetch(ORDER_API, {
+      fetch(ORDER_API + "/GET/order", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
+          cookie: req.headers.cookie,
         },
       }),
     ]);
@@ -293,19 +292,12 @@ router.get("/api/management", async (req, res) => {
 //THÊM MỚI SẢN PHẨM
 router.post("/management", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const productData = req.body;
-    const response = await fetch(PRODUCT_API, {
+    const response = await fetch(PRODUCT_API + "/POST/product", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
       body: JSON.stringify(productData),
     });
@@ -325,20 +317,13 @@ router.post("/management", async (req, res) => {
 //SỬA SẢN PHẨM
 router.put("/management/product/:id", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const productData = req.body;
     const productId = req.params.id;
-    const response = await fetch(PRODUCT_API + `/${productId}`, {
+    const response = await fetch(PRODUCT_API + `/PUT/product/${productId}`, {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
       body: JSON.stringify(productData),
     });
@@ -359,20 +344,13 @@ router.put("/management/product/:id", async (req, res) => {
 //SỬA TÌNH TRẠNG ĐƠN HÀNG
 router.patch("/management/order/:id", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const orderData = req.body;
     const orderId = req.params.id;
-    const response = await fetch(ORDER_API + `/${orderId}`, {
+    const response = await fetch(ORDER_API + `/PATCH/order/${orderId}`, {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        cookie: req.headers.cookie,
       },
       body: JSON.stringify(orderData),
     });
@@ -392,18 +370,11 @@ router.patch("/management/order/:id", async (req, res) => {
 //XÓA SẢN PHẨM
 router.delete("/management/product/:id", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const productId = req.params.id;
-    const response = await fetch(PRODUCT_API + `/${productId}`, {
+    const response = await fetch(PRODUCT_API + `/DELETE/product/${productId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        cookie: req.headers.cookie,
       },
     });
     const data = await response.json();
@@ -422,18 +393,11 @@ router.delete("/management/product/:id", async (req, res) => {
 //XÓA ĐƠN HÀNG
 router.delete("/management/order/:id", async (req, res) => {
   try {
-    const auth = req.headers["authorization"];
-    if (!auth) {
-      return res.status(401).json({
-        message: "Không có Authorization",
-      });
-    }
-    const token = auth.split(" ")[1];
     const orderId = req.params.id;
-    const response = await fetch(ORDER_API + `/${orderId}`, {
+    const response = await fetch(ORDER_API + `/DELETE/order/${orderId}`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`,
+        cookie: req.headers.cookie,
       },
     });
     const data = await response.json();

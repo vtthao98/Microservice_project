@@ -6,7 +6,7 @@ var isAdmin = require("../middlewares/authorizate");
 var router = express.Router();
 
 //LẤY TẤT CẢ SẢN PHẨM
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/GET/product", authMiddleware, async (req, res) => {
   try {
     const productsData = await products.find();
     res.status(200).json(productsData);
@@ -19,7 +19,7 @@ router.get("/", authMiddleware, async (req, res) => {
 });
 
 //THÊM SẢN PHẨM
-router.post("/", authMiddleware, isAdmin, async (req, res) => {
+router.post("/POST/product", authMiddleware, isAdmin, async (req, res) => {
   const { name, image, price } = req.body;
   if (!name || !image || !price) {
     return res.status(400).json({
@@ -35,14 +35,15 @@ router.post("/", authMiddleware, isAdmin, async (req, res) => {
       message: "Thêm đố uống thành công",
     });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({
-      message: "Tên đồ uống đã tồn tại",
+      message: "Thêm sản phẩm thất bại",
     });
   }
 });
 
 //SỬA THÔNG TIN SẢN PHẨM
-router.put("/:id", authMiddleware, isAdmin, async (req, res) => {
+router.put("/PUT/product/:id", authMiddleware, isAdmin, async (req, res) => {
   const { name, image, price } = req.body;
   const productId = req.params.id;
 
@@ -80,26 +81,31 @@ router.put("/:id", authMiddleware, isAdmin, async (req, res) => {
 });
 
 //XÓA SẢN PHẨM
-router.delete("/:id", authMiddleware, isAdmin, async (req, res) => {
-  const productId = req.params.id;
-  try {
-    const product = await products.findByIdAndDelete(productId);
+router.delete(
+  "/DELETE/product/:id",
+  authMiddleware,
+  isAdmin,
+  async (req, res) => {
+    const productId = req.params.id;
+    try {
+      const product = await products.findByIdAndDelete(productId);
 
-    if (!product) {
-      return res.status(404).json({
-        message: "Không tìm thấy sản phẩm",
+      if (!product) {
+        return res.status(404).json({
+          message: "Không tìm thấy sản phẩm",
+        });
+      }
+
+      res.status(200).json({
+        message: "Xóa sản phẩm thành công",
+      });
+    } catch (error) {
+      res.status(400).json({
+        message: "Xóa sản phẩm không thành công",
+        error: error.message,
       });
     }
-
-    res.status(200).json({
-      message: "Xóa sản phẩm thành công",
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Xóa sản phẩm không thành công",
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = router;

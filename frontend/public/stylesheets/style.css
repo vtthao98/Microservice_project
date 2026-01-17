@@ -80,7 +80,7 @@ body {
 .product-container .order-box {
   flex-basis: 30%;
   background-color: rgb(146, 82, 140);
-  box-shadow: 5px 0px 10px #fff;
+  box-shadow: 5px 0px 10px #333;
 }
 
 .product-container .product-box {
@@ -272,6 +272,13 @@ body {
 .floating-btn:hover {
   opacity: 0.7;
   transform: scale(1.1);
+}
+
+.logout-btn {
+  border-radius: 5px;
+  left: 20px;
+  border: none;
+  transform: rotate(0.5turn);
 }
 
 .order-container {

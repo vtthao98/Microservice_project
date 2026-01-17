@@ -9,12 +9,20 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    <script type="module">
-      import { requireLogin } from "/javascripts/auth.js";
-      requireLogin();
+    <script>
+      async function logout() {
+        await fetch("/logout", {
+          method: "POST",
+          credentials: "include",
+        });
+        window.location.href = "/";
+      }
     </script>
   </head>
   <body>
+    <button onclick="logout()" class="floating-btn logout-btn">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i>
+    </button>
     <div class="product-container">
       <div class="order-box">
         <div class="order-info">

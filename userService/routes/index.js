@@ -2,11 +2,12 @@ var express = require("express");
 var users = require("../models/model.user");
 var jwt = require("jsonwebtoken");
 var authMiddleware = require("../middlewares/auth");
+var logout = require("../middlewares/logout");
 
 var router = express.Router();
 
 //test
-router.get("/me", authMiddleware, async (req, res) => {
+router.get("/GET/me", authMiddleware, async (req, res) => {
   try {
     const user = await users.findById(req.user.id);
     res.status(200).json(user);
@@ -19,7 +20,7 @@ router.get("/me", authMiddleware, async (req, res) => {
 });
 
 //ĐĂNG NHẬP
-router.post("/", async (req, res) => {
+router.post("/POST/login", async (req, res) => {
   const { phone, password } = req.body;
   if (!phone || !password) {
     return res.status(400).json({
@@ -46,14 +47,20 @@ router.post("/", async (req, res) => {
     { expiresIn: "1d" }
   );
 
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
   res.status(200).json({
-    token: token,
     role: user.role,
   });
 });
 
 //ĐĂNG KÝ
-router.post("/register", async (req, res) => {
+router.post("/POST/register", async (req, res) => {
   const { name, phone, password } = req.body;
   if (!phone || !password) {
     return res.status(400).json({
@@ -74,8 +81,13 @@ router.post("/register", async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
-      token: token,
       role: user.role,
     });
   } catch (error) {
@@ -84,5 +96,8 @@ router.post("/register", async (req, res) => {
     });
   }
 });
+
+//ĐĂNG XUẤT
+router.post("/POST/logout", logout);
 
 module.exports = router;

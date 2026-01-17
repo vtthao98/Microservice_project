@@ -20,6 +20,7 @@ async function register() {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         name: name,
         phone: phone,
@@ -32,9 +33,8 @@ async function register() {
     }
 
     const data = await response.json();
-    console.log("Register:", data);
     alert("Đăng ký thành công");
-    localStorage.setItem("userId", data.userId);
+
     window.location.href = "/order";
   } catch (error) {
     alert(error.message);

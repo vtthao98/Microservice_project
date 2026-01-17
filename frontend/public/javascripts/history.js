@@ -1,4 +1,3 @@
-import { token } from "./auth.js";
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
@@ -11,9 +10,7 @@ async function loadHistory() {
   try {
     const response = await fetch("/api/history", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     const orderHistory = await response.json();
@@ -59,9 +56,7 @@ window.openOrderDetail = async function (orderID) {
   try {
     const response = await fetch(`/api/history/${orderID}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       throw new Error("Không lấy được chi tiết đơn hàng");

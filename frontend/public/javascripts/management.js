@@ -1,5 +1,3 @@
-import { token } from "./auth.js";
-
 const formatterVND = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
@@ -12,9 +10,7 @@ async function loadData() {
   try {
     const response = await fetch("/api/management", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       throw new Error("Không lấy được dữ liệu");
@@ -174,9 +170,7 @@ window.openOrderDetail = async function (orderID) {
   try {
     const response = await fetch(`/api/history/${orderID}`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       throw new Error("Không lấy được chi tiết đơn hàng");
@@ -229,9 +223,9 @@ window.addProduct = async function () {
     const response = await fetch("/management", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         name: name,
         image: image,
@@ -269,9 +263,9 @@ window.updateProduct = async function (productID) {
     const response = await fetch(`/management/product/${productID}`, {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         name: name,
         image: image,
@@ -300,9 +294,9 @@ window.updateOrder = async function () {
     const response = await fetch(`/management/order/${orderId}`, {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({
         orderStatus: orderStatus,
       }),
@@ -326,9 +320,7 @@ window.deleteProduct = async function (id) {
   try {
     const response = await fetch(`/management/product/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -346,9 +338,7 @@ window.deleteOrder = async function (id) {
   try {
     const response = await fetch(`/management/order/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       const errorData = await response.json();
